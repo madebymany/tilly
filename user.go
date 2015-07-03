@@ -210,14 +210,6 @@ func (self *User) endStandup(s *Standup) {
 	}()
 }
 
-func (self *User) standupAlreadyFinished(s *Standup) {
-	self.sendIM(fmt.Sprintf(
-		UserStandupAlreadyFinishedText, s.Channel.Name))
-	if self.standupsFinished[s] {
-		delete(self.standupsFinished, s)
-	}
-}
-
 func (self *User) endCurrentStandup() {
 	self.endStandup(self.currentStandup)
 }
@@ -229,6 +221,14 @@ func (self *User) popQueuedStandup() (s *Standup) {
 	}
 	s, self.standupQueue = q[len(q)-1], q[:len(q)-1]
 	return
+}
+
+func (self *User) standupAlreadyFinished(s *Standup) {
+	self.sendIM(fmt.Sprintf(
+		UserStandupAlreadyFinishedText, s.Channel.Name))
+	if self.standupsFinished[s] {
+		delete(self.standupsFinished, s)
+	}
 }
 
 func (self *User) nag() {
