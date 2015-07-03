@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/nlopes/slack"
 	"log"
+	"math/rand"
 	"os"
 	"time"
 )
@@ -18,9 +19,9 @@ var Questions = []Question{
 	Question{Text: "How are you feeling?"},
 }
 
-const StandupTimeMinutes = 1
+const StandupTimeMinutes = 4
 
-var StandupNagMinuteDelays = []int{15, 5}
+var StandupNagMinuteDelays = []int{1, 2, 3}
 
 const UserStandupStartText = "*WOOF!* Stand-up for #%s starting.\nMessage me `skip` to duck out of this one."
 const UserStandupEndText = "Thanks! All done."
@@ -28,6 +29,16 @@ const UserStandupTimeUpText = "Too slow! The stand-up's finished now. Catch up i
 const UserStandupAlreadyFinishedText = "Your next standup would have been for #%s but it's already finished. Catch up in the channel."
 const UserNextStandupText = "But wait, you have another stand-up to attend…"
 const UserConfirmSkipText = "Okay!"
+
+var UserNagMessages = []string{
+	"_nuzzle_ Don't forget me!",
+	"_offers paw_ Do you have anything to say today?",
+	"_wide puppy eyes_ Why are you so silent?",
+	"Nudge. Nudgenudge.",
+	"_stands right beside you, wagging tail so it thwocks against your leg_",
+	"_paces around you_",
+	"_drops the stand-up talking stick at your feet_",
+}
 
 var DefaultMessageParameters = slack.PostMessageParameters{
 	AsUser:      true,
@@ -86,4 +97,14 @@ func main() {
 		// wait
 		time.Sleep(time.Minute)
 	}
+}
+
+func RandomisedNags() (out []string) {
+	out = make([]string, len(UserNagMessages))
+	copy(out, UserNagMessages)
+	for i := range out {
+		j := rand.Intn(i + 1)
+		out[i], out[j] = out[j], out[i]
+	}
+	return
 }

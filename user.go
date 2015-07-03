@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/nlopes/slack"
 	"strings"
+	"time"
 )
 
 /* Note there's a bit of a race between standups signalling that they've
@@ -23,6 +24,10 @@ type User struct {
 	currentStandup     *Standup
 	currentQuestionIdx int
 	standupsFinished   map[*Standup]bool
+	nagMinuteDelays    []int
+	nagMessages        []string
+	nagMessageIdx      int
+	nagTimers          map[*time.Timer]bool
 }
 
 type userEvent interface {
@@ -30,6 +35,7 @@ type userEvent interface {
 }
 
 type userMessage slack.MessageEvent
+type userNag struct{}
 
 // tried to alias to the pointer type instead of wrapping in a struct, but
 // go kept moaning at me and I couldn't work out why.
@@ -46,6 +52,9 @@ type userEndStandup struct {
 }
 
 func (um userMessage) isUserEvent() {
+}
+
+func (un userNag) isUserEvent() {
 }
 
 func (s userStartStandup) isUserEvent() {
@@ -69,12 +78,20 @@ func NewUser(client *AuthedSlack, info slack.User, imChannelId string) (u *User)
 		events:           make(chan userEvent),
 		standupQueue:     make([]*Standup, 0, 5),
 		standupsFinished: make(map[*Standup]bool),
+		nagMessages:      RandomisedNags(),
+		nagMinuteDelays:  StandupNagMinuteDelays,
 	}
+	u.resetNags()
 	go u.start()
 	return
 }
 
 func (self *User) start() {
+	for _, m := range self.nagMinuteDelays {
+		nag := time.AfterFunc(time.Duration(m)*time.Minute, self.nag)
+		self.nagTimers[nag] = true
+	}
+
 	for ei := range self.events {
 		switch e := ei.(type) {
 		case userMessage:
@@ -85,6 +102,7 @@ func (self *User) start() {
 				self.currentStandup.ReportUserAnswer(self, self.currentQuestionIdx, e.Text)
 				self.advanceQuestion()
 			}
+
 		case userStartStandup:
 			s := e.standup
 			s.ReportUserAcknowledged(self)
@@ -94,6 +112,7 @@ func (self *User) start() {
 			} else {
 				self.standupQueue = append(self.standupQueue, s)
 			}
+
 		case userEndStandup:
 			s := e.standup
 
@@ -101,6 +120,7 @@ func (self *User) start() {
 
 			if s == self.currentStandup {
 				self.currentStandup = nil
+				self.resetNags()
 
 				next := self.popQueuedStandup()
 				if next != nil {
@@ -112,6 +132,11 @@ func (self *User) start() {
 					}
 				}
 			}
+
+		case userNag:
+			self.sendIM(self.nagMessages[self.nagMessageIdx])
+			self.nagMessageIdx = (self.nagMessageIdx + 1) % len(self.nagMessages)
+
 		case userStandupTimeUp:
 			s := e.standup
 			if s == self.currentStandup {
@@ -204,6 +229,19 @@ func (self *User) popQueuedStandup() (s *Standup) {
 	}
 	s, self.standupQueue = q[len(q)-1], q[:len(q)-1]
 	return
+}
+
+func (self *User) nag() {
+	self.events <- userNag{}
+}
+
+func (self *User) resetNags() {
+	if self.nagTimers != nil {
+		for nag, _ := range self.nagTimers {
+			nag.Stop()
+		}
+	}
+	self.nagTimers = make(map[*time.Timer]bool)
 }
 
 func (self *User) askCurrentQuestion() {
