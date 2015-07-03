@@ -18,8 +18,16 @@ var Questions = []Question{
 	Question{Text: "How are you feeling?"},
 }
 
-const UserStandupStartText = "WOOF! Standup for %s starting."
+const StandupTimeMinutes = 1
+
+var StandupNagMinuteDelays = []int{15, 5}
+
+const UserStandupStartText = "*WOOF!* Stand-up for #%s starting.\nMessage me `skip` to duck out of this one."
 const UserStandupEndText = "Thanks! All done."
+const UserStandupTimeUpText = "Too slow! The stand-up's finished now. Catch up in the channel."
+const UserStandupAlreadyFinishedText = "Your next standup would have been for #%s but it's already finished. Catch up in the channel."
+const UserNextStandupText = "But wait, you have another stand-up to attend…"
+const UserConfirmSkipText = "Okay!"
 
 var DefaultMessageParameters = slack.PostMessageParameters{
 	AsUser:      true,
@@ -71,10 +79,11 @@ func main() {
 			continue
 		}
 
-		s := NewStandup(authClient, ch, userManager)
-		s.Run()
+		go NewStandup(authClient, ch, userManager).Run()
 	}
 
-	// hack for now
-	time.Sleep(time.Second)
+	for {
+		// wait
+		time.Sleep(time.Minute)
+	}
 }
