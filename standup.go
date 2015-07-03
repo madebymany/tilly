@@ -9,7 +9,7 @@ import (
 )
 
 type Standup struct {
-	Questions        []Question
+	Questions        []string
 	Finished         bool
 	Channel          slack.Channel
 	Duration         time.Duration
@@ -86,7 +86,7 @@ func (self *Standup) Run() {
 	msg.WriteString("@channel: *BARKBARKBARK Stand-up done!*\nQuestions were:\n")
 	for _, q := range self.Questions {
 		msg.WriteString("• ")
-		msg.WriteString(q.Text)
+		msg.WriteString(q)
 		msg.WriteString("\n")
 	}
 	msg.WriteString("\n")

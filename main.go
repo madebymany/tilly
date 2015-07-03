@@ -8,15 +8,11 @@ import (
 	"time"
 )
 
-type Question struct {
-	Text string
-}
-
-var Questions = []Question{
-	Question{Text: "What did you do yesterday?"},
-	Question{Text: "What are you planning to do today?"},
-	Question{Text: "Are you blocked by anything? If so, what?"},
-	Question{Text: "How are you feeling?"},
+var Questions = []string{
+	"What did you do yesterday?",
+	"What are you planning to do today?",
+	"Are you blocked by anything? If so, what?",
+	"How are you feeling?",
 }
 
 const StandupTimeMinutes = 4

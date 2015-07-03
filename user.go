@@ -245,7 +245,7 @@ func (self *User) resetNags() {
 }
 
 func (self *User) askCurrentQuestion() {
-	self.sendIM(self.currentStandup.Questions[self.currentQuestionIdx].Text)
+	self.sendIM(self.currentStandup.Questions[self.currentQuestionIdx])
 }
 
 func (self *User) handleError() {
