@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/nlopes/slack"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -51,6 +52,16 @@ type AuthedSlack struct {
 	UserId string
 }
 
+var DebugLog *log.Logger
+
+func init() {
+	if os.Getenv("DEBUG") != "" {
+		DebugLog = log.New(os.Stderr, "debug: ", log.LstdFlags|log.Lshortfile)
+	} else {
+		DebugLog = log.New(ioutil.Discard, "", 0)
+	}
+}
+
 func main() {
 	var err error
 
@@ -68,6 +79,17 @@ func main() {
 		log.Fatalf("Couldn't log in: %s", err)
 	}
 	authClient := &AuthedSlack{Slack: client, UserId: auth.UserId}
+
+	imchs, err := authClient.GetIMChannels()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, imch := range imchs {
+		_, _, err = authClient.CloseIMChannel(imch.Id)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	slackWS, err := authClient.StartRTM("", "https://madebymany.slack.com")
 	if err != nil {

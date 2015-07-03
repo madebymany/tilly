@@ -43,6 +43,8 @@ func (self *UserManager) ReceiveMessageReply(m slack.MessageEvent) {
 }
 
 func (self *UserManager) start() {
+	DebugLog.Println("UserManager started")
+
 	var user *User
 	var err error
 	var ok bool
@@ -66,6 +68,7 @@ func (self *UserManager) start() {
 					self.usersByIMChannelId[m.ChannelId] = user
 				}
 			}
+			DebugLog.Printf("delivering message %s to user %s", m.Timestamp, user.Info.Name)
 			user.ReceiveMessageReply(m)
 
 		case ns := <-self.newStandups:

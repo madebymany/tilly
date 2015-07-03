@@ -22,8 +22,10 @@ func NewEventReceiver(client *slack.SlackWS, um *UserManager, botUserId string) 
 
 func (self *EventReceiver) Start() {
 	go self.client.HandleIncomingEvents(self.events)
+	DebugLog.Println("EventReceiver started")
 	for ev := range self.events {
 		if m, ok := ev.Data.(*slack.MessageEvent); ok && m.UserId != self.botUserId {
+			DebugLog.Printf("Received message id %s from RTM, userId '%s' : %s", m.Timestamp, m.UserId, m.Text)
 			self.userManager.ReceiveMessageReply(*m)
 		}
 	}

@@ -99,6 +99,7 @@ func (self *User) start() {
 				if self.handleStandupCommand(e.Text) {
 					continue
 				}
+				DebugLog.Printf("reporting message id %s as answer from %s", e.Id, self.Info.Id)
 				self.currentStandup.ReportUserAnswer(self, self.currentQuestionIdx, e.Text)
 				self.advanceQuestion()
 			}

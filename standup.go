@@ -83,7 +83,7 @@ func (self *Standup) Run() {
 
 	var msg bytes.Buffer
 
-	msg.WriteString("@channel: *BARKBARKBARK Stand-up done!*\nQuestions were:\n")
+	msg.WriteString("<!everyone>: *BARKBARKBARK Stand-up done!*\nQuestions were:\n")
 	for _, q := range self.Questions {
 		msg.WriteString("• ")
 		msg.WriteString(q)
@@ -92,7 +92,7 @@ func (self *Standup) Run() {
 	msg.WriteString("\n")
 
 	for user, anyReply := range self.userReplies {
-		userName := fmt.Sprintf("@%s", user.Info.Name)
+		userName := fmt.Sprintf("<@%s|%s>", user.Info.Id, user.Info.Name)
 		switch reply := anyReply.(type) {
 		case userAnswersReply:
 			msg.WriteString(userName)
@@ -119,7 +119,12 @@ func (self *Standup) Run() {
 		msg.WriteString("\n")
 	}
 
-	self.client.PostMessage(self.Channel.Id, msg.String(), DefaultMessageParameters)
+	var params slack.PostMessageParameters
+	params = DefaultMessageParameters
+	params.Parse = "none"
+	params.LinkNames = 0
+	params.EscapeText = false
+	self.client.PostMessage(self.Channel.Id, msg.String(), params)
 }
 
 func (self *Standup) ReportUserAcknowledged(u *User) {
@@ -134,6 +139,7 @@ func (self *Standup) ReportUserAnswer(u *User, qidx int, answer string) {
 	self.userRepliesMutex.Lock()
 	defer self.userRepliesMutex.Unlock()
 
+	DebugLog.Printf("got answer from user %s: %s", u.Info.Name, answer)
 	reply, replyExists := self.userReplies[u]
 	if _, isAbsent := reply.(userAbsentReply); !replyExists || isAbsent {
 		reply = make(userAnswersReply, len(self.Questions))
