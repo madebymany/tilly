@@ -54,6 +54,8 @@ type AuthedSlack struct {
 func main() {
 	var err error
 
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {
 		log.Fatalln("You must provide a SLACK_TOKEN environment variable")

@@ -134,8 +134,8 @@ func (self *Standup) ReportUserAnswer(u *User, qidx int, answer string) {
 	self.userRepliesMutex.Lock()
 	defer self.userRepliesMutex.Unlock()
 
-	reply, ok := self.userReplies[u]
-	if !ok {
+	reply, replyExists := self.userReplies[u]
+	if _, isAbsent := reply.(userAbsentReply); !replyExists || isAbsent {
 		reply = make(userAnswersReply, len(self.Questions))
 		self.userReplies[u] = reply
 	}
