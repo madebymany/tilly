@@ -11,6 +11,8 @@ type UserManager struct {
 	newStandups        chan newStandupForUser
 	usersByUserId      map[string]*User
 	usersByIMChannelId map[string]*User
+	userIdBlacklist    map[string]bool
+	channelIdBlacklist map[string]bool
 }
 
 type newStandupForUser struct {
@@ -25,6 +27,8 @@ func NewUserManager(client *AuthedSlack) (um *UserManager) {
 		newStandups:        make(chan newStandupForUser),
 		usersByUserId:      make(map[string]*User),
 		usersByIMChannelId: make(map[string]*User),
+		userIdBlacklist:    make(map[string]bool),
+		channelIdBlacklist: make(map[string]bool),
 	}
 	go um.start()
 	return
@@ -84,19 +88,34 @@ func (self *UserManager) start() {
 }
 
 func (self *UserManager) lookupUserByIMChannelId(channelId string) (user *User, err error) {
+	if self.channelIdBlacklist[channelId] {
+		return nil, nil
+	}
+
+	/* TODO: we could do better here, tracking opening and closing
+	 * of IM channels with the RTM API
+	 */
 	ims, err := self.client.GetIMChannels()
 	if err != nil {
 		return
 	}
 	for _, im := range ims {
-		if channelId != "" && im.Id == channelId {
-			return self.newUser(im.UserId, im.Id)
+		if im.Id == channelId {
+			user, err = self.newUser(im.UserId, im.Id)
+			if user == nil && err == nil {
+				self.channelIdBlacklist[channelId] = true
+			}
+			return
 		}
 	}
 	return
 }
 
 func (self *UserManager) lookupUserById(userId string) (user *User, err error) {
+	if self.userIdBlacklist[userId] {
+		return nil, nil
+	}
+
 	_, _, channelId, err := self.client.OpenIMChannel(userId)
 	if err != nil {
 		return nil, err
@@ -108,6 +127,10 @@ func (self *UserManager) newUser(userId string, imChannelId string) (user *User,
 	userInfo, err := self.client.GetUserInfo(userId)
 	if err != nil {
 		return nil, err
+	}
+	if userInfo.IsBot {
+		self.userIdBlacklist[userInfo.Id] = true
+		return nil, nil
 	}
 	return NewUser(self.client, *userInfo, imChannelId), nil
 }
