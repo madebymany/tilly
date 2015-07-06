@@ -29,13 +29,7 @@ const UserNextStandupText = "But wait, you have another stand-up to attend…"
 const UserConfirmSkipText = "Okay!"
 
 var UserNagMessages = []string{
-	"_nuzzle_ Don't forget me!",
-	"_offers paw_ Do you have anything to say today?",
-	"_wide puppy eyes_ Why are you so silent?",
-	"Nudge. Nudgenudge.",
-	"_stands right beside you, wagging tail so it thwocks against your leg_",
-	"_paces around you_",
-	"_drops the stand-up talking stick at your feet_",
+	"Don't forget to answer me!",
 }
 
 var DefaultMessageParameters = slack.PostMessageParameters{
