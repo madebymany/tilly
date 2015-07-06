@@ -103,6 +103,10 @@ func (self *Standup) Run() {
 			msg.WriteString(userName)
 			msg.WriteString(" answered:\n")
 			for _, a := range reply {
+				if a == "" {
+					msg.WriteString("but didn't respond to the rest.\n")
+					break
+				}
 				msg.WriteString("• ")
 				msg.WriteString(a)
 				msg.WriteString("\n")
