@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/abourget/slack"
+	"github.com/madebymany/tilly/Godeps/_workspace/src/github.com/abourget/slack"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
-	"time"
+	"sync"
 )
 
 var Questions = []string{
@@ -55,6 +55,8 @@ type AuthedSlack struct {
 var DebugLog *log.Logger
 
 func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	if os.Getenv("DEBUG") != "" {
 		DebugLog = log.New(os.Stderr, "debug: ", log.LstdFlags|log.Lshortfile)
 	} else {
@@ -64,8 +66,6 @@ func init() {
 
 func main() {
 	var err error
-
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {
@@ -90,18 +90,18 @@ func main() {
 		log.Fatalf("Couldn't get channels: %s", err)
 	}
 
+	exitWaitGroup := new(sync.WaitGroup)
+
 	for _, ch := range chs {
 		if ch.IsGeneral || !ch.IsMember {
 			continue
 		}
 
-		go NewStandup(authClient, ch, userManager).Run()
+		s := NewStandup(authClient, ch, userManager, exitWaitGroup)
+		go s.Run()
 	}
 
-	for {
-		// wait
-		time.Sleep(time.Minute)
-	}
+	exitWaitGroup.Wait()
 }
 
 func RandomisedNags() (out []string) {

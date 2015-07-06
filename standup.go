@@ -3,22 +3,23 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/abourget/slack"
+	"github.com/madebymany/tilly/Godeps/_workspace/src/github.com/abourget/slack"
 	"sync"
 	"time"
 )
 
 type Standup struct {
-	Questions        []string
-	Finished         bool
-	Channel          slack.Channel
-	Duration         time.Duration
-	client           *AuthedSlack
-	userIds          []string
-	userManager      *UserManager
-	userReplies      map[*User]userReply
-	userRepliesMutex sync.Mutex
-	finishedChan     chan struct{}
+	Questions         []string
+	Finished          bool
+	Channel           slack.Channel
+	Duration          time.Duration
+	client            *AuthedSlack
+	userIds           []string
+	userManager       *UserManager
+	userReplies       map[*User]userReply
+	userRepliesMutex  sync.Mutex
+	finishedChan      chan struct{}
+	reportedWaitGroup *sync.WaitGroup
 }
 
 type userReply interface {
@@ -51,15 +52,19 @@ func (r userSkippedReply) isUserReply() {
 func (r userErrorReply) isUserReply() {
 }
 
-func NewStandup(client *AuthedSlack, channel slack.Channel, userManager *UserManager) (s *Standup) {
+func NewStandup(client *AuthedSlack, channel slack.Channel, userManager *UserManager, reportedWaitGroup *sync.WaitGroup) (s *Standup) {
+
+	reportedWaitGroup.Add(1)
+
 	s = &Standup{
-		client:       client,
-		Channel:      channel,
-		userManager:  userManager,
-		userReplies:  make(map[*User]userReply),
-		Questions:    Questions,
-		finishedChan: make(chan struct{}, 1),
-		Duration:     StandupTimeMinutes * time.Minute,
+		client:            client,
+		Channel:           channel,
+		userManager:       userManager,
+		userReplies:       make(map[*User]userReply),
+		Questions:         Questions,
+		finishedChan:      make(chan struct{}, 1),
+		Duration:          StandupTimeMinutes * time.Minute,
+		reportedWaitGroup: reportedWaitGroup,
 	}
 
 	s.userIds = make([]string, 0, len(s.Channel.Members))
@@ -125,6 +130,8 @@ func (self *Standup) Run() {
 	params.LinkNames = 0
 	params.EscapeText = false
 	self.client.PostMessage(self.Channel.Id, msg.String(), params)
+
+	self.reportedWaitGroup.Done()
 }
 
 func (self *Standup) ReportUserAcknowledged(u *User) {
