@@ -80,17 +80,6 @@ func main() {
 	}
 	authClient := &AuthedSlack{Client: client, UserId: auth.UserId}
 
-	imchs, err := authClient.GetIMChannels()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, imch := range imchs {
-		_, _, err = authClient.CloseIMChannel(imch.Id)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
 	slackWS := authClient.NewRTM()
 	userManager := NewUserManager(authClient)
 	eventReceiver := NewEventReceiver(slackWS, userManager, auth.UserId)
