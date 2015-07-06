@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"os"
 	"sync"
+	"time"
 )
 
 var Questions = []string{
@@ -70,6 +71,10 @@ func main() {
 	slackToken := os.Getenv("SLACK_TOKEN")
 	if slackToken == "" {
 		log.Fatalln("You must provide a SLACK_TOKEN environment variable")
+	}
+
+	if day := time.Now().Weekday(); os.Getenv("TILLY_WEEKDAY_ONLY") != "" && (day < time.Monday || day > time.Friday) {
+		log.Fatalln("Exiting; it's the weekend and I'm set to only run on a weekday")
 	}
 
 	client := slack.New(slackToken)
