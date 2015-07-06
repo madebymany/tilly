@@ -1,0 +1,17 @@
+{
+	"ImportPath": "github.com/madebymany/tilly",
+	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/abourget/slack",
+			"Rev": "8cd4dbc0c21d6043fdb2b41619fad70e0f767128"
+		},
+		{
+			"ImportPath": "golang.org/x/net/websocket",
+			"Rev": "ff8eb9a34a5cbb9941ffc6f84a19a8014c2646ad"
+		}
+	]
+}
