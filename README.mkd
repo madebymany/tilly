@@ -1,0 +1,24 @@
+# Tilly
+
+The Slack stand-up bot.
+
+by Dan Brown <dan@stompydan.net>
+
+We had a good look around, and existing stand-up bots are very command-driven. They are aimed at people comfortable with even the idea of a bot, and issuing it commands to it to start a stand-up, update the stand-up, and so on. This is fine for developers or other technically-minded people, but not so much for everyone else. So Peter had the idea of a stand-up bot that
+
+* Starts automatically at a particular time of (week) day;
+* DMs everyone in certain channels and asks them for updates, asking a question at a time in a conversational style;
+* Lasts for a given length of time (probably half an hour);
+* Reminds people over that period if they haven't completed their answers;
+* Allows people to skip stand-up for that day;
+* And when then stand-up is over, either because everyone has responded or the time is up, posts one message in the channel summarising all responses.
+
+We couldn't find anything that did this, so I made Tilly. The Weimeraner stand-up bot.
+
+## Code
+
+Uses [godep](https://github.com/tools/godep). Please keep its config file up-to-date with dependencies you use.
+
+I switched to [this fork](https://github.com/abourget/slack) of [this Slack client library](https://github.com/nlopes/slack) because it doesn't `exit(1)` if things go wrong with the RTM connection. Also it appears to be faster.
+
+The program is designed to run once for a day's worth of stand-ups and then exit. It should be scheduled by cron or similar.
