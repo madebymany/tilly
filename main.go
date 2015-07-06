@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/nlopes/slack"
+	"github.com/abourget/slack"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -48,7 +48,7 @@ var DefaultMessageParameters = slack.PostMessageParameters{
 }
 
 type AuthedSlack struct {
-	*slack.Slack
+	*slack.Client
 	UserId string
 }
 
@@ -78,7 +78,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Couldn't log in: %s", err)
 	}
-	authClient := &AuthedSlack{Slack: client, UserId: auth.UserId}
+	authClient := &AuthedSlack{Client: client, UserId: auth.UserId}
 
 	imchs, err := authClient.GetIMChannels()
 	if err != nil {
@@ -91,11 +91,7 @@ func main() {
 		}
 	}
 
-	slackWS, err := authClient.StartRTM("", "https://madebymany.slack.com")
-	if err != nil {
-		log.Fatalf("Couldn't start RTM: %s", err)
-	}
-
+	slackWS := authClient.NewRTM()
 	userManager := NewUserManager(authClient)
 	eventReceiver := NewEventReceiver(slackWS, userManager, auth.UserId)
 	go eventReceiver.Start()

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/nlopes/slack"
+	"github.com/abourget/slack"
 	"log"
 )
 

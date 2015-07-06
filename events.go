@@ -1,30 +1,29 @@
 package main
 
 import (
-	"github.com/nlopes/slack"
+	"github.com/abourget/slack"
 )
 
 type EventReceiver struct {
-	client      *slack.SlackWS
+	client      *slack.RTM
 	userManager *UserManager
-	events      chan slack.SlackEvent
 	botUserId   string
 }
 
-func NewEventReceiver(client *slack.SlackWS, um *UserManager, botUserId string) (er *EventReceiver) {
+func NewEventReceiver(client *slack.RTM, um *UserManager, botUserId string) (er *EventReceiver) {
+	client.IncomingEvents = make(chan slack.SlackEvent)
 	return &EventReceiver{
 		client:      client,
 		userManager: um,
-		events:      make(chan slack.SlackEvent),
 		botUserId:   botUserId,
 	}
 }
 
 func (self *EventReceiver) Start() {
-	go self.client.HandleIncomingEvents(self.events)
+	go self.client.ManageConnection()
 	DebugLog.Println("EventReceiver started")
-	for ev := range self.events {
-		if m, ok := ev.Data.(*slack.MessageEvent); ok && m.UserId != self.botUserId {
+	for ev := range self.client.IncomingEvents {
+		if m, ok := ev.Data.(*slack.MessageEvent); ok && m.UserId != self.botUserId && m.Text != "" {
 			DebugLog.Printf("Received message id %s from RTM, userId '%s' : %s", m.Timestamp, m.UserId, m.Text)
 			self.userManager.ReceiveMessageReply(*m)
 		}

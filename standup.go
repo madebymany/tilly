@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/nlopes/slack"
+	"github.com/abourget/slack"
 	"sync"
 	"time"
 )
