@@ -13,7 +13,7 @@ We had a good look around, and existing stand-up bots are very command-driven. T
 * Allows people to skip stand-up for that day;
 * And when then stand-up is over, either because everyone has responded or the time is up, posts one message in the channel summarising all responses.
 
-We couldn't find anything that did this, so I made Tilly. The Weimeraner stand-up bot.
+We couldn't find anything that did this, so I made Tilly. The Weimaraner stand-up bot.
 
 ## Code
 
