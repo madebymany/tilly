@@ -2,9 +2,9 @@
 
 The Slack stand-up bot.
 
-by Dan Brown <dan@stompydan.net>
+by [Dan Brown](https://twitter.com/stompydan) <dan@stompydan.net>
 
-We had a good look around, and existing stand-up bots are very command-driven. They are aimed at people comfortable with even the idea of a bot, and issuing it commands to it to start a stand-up, update the stand-up, and so on. This is fine for developers or other technically-minded people, but not so much for everyone else. So Peter had the idea of a stand-up bot that
+We had a good look around, and existing stand-up bots are very command-driven. They are aimed at people comfortable with even the idea of a bot, and issuing it commands to it to start a stand-up, update the stand-up, and so on. This is fine for developers or other technically-minded people, but not so much for everyone else. So [Peter](https://twitter.com/peterparkes) had the idea of a stand-up bot that
 
 * Starts automatically at a particular time of (week) day;
 * DMs everyone in certain channels and asks them for updates, asking a question at a time in a conversational style;
