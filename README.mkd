@@ -22,3 +22,19 @@ Uses [godep](https://github.com/tools/godep). Please keep its config file up-to-
 I switched to [this fork](https://github.com/abourget/slack) of [this Slack client library](https://github.com/nlopes/slack) because it doesn't `exit(1)` if things go wrong with the RTM connection. Also it appears to be faster.
 
 The program is designed to run once for a day's worth of stand-ups and then exit. It should be scheduled by cron or similar.
+
+## Running Suggestions
+
+Currently we're using [Heroku](https://heroku.com) to run Tilly. Heroku supports Go projects now, so all you'd have to do is:
+
+* Clone this repository
+* `heroku create tilly-$myorg` (give it a nice, but unique name)
+* [Create a bot user in Slack](https://slack.com/services/new/bot) and note its token
+* `heroku config:add SLACK_TOKEN=$bot_token` (substitute in the token from the previous step)
+* Probably `heroku config:add TILLY_WEEKDAY_ONLY=1`, unless you work weekends (the Heroku Scheduler doesn't discriminate on days of the week)
+* `git push heroku master` to deploy and build Tilly.
+* `heroku addons:create scheduler` to add the Heroku Scheduler to this app
+* `heroku addons:open scheduler` to open the Web interface.
+* Add a task to run Tilly on the schedule you decide. She will run a standup for all channels she has been invited to. The command line to run is simply `tilly`. Note the times are, annoyingly, specified in UTC. Add a reminder in your calendar to update it when daylight savings kick in!
+
+Future versions may well allow for configuring the scheduling in Tilly (through commands in Slack or whatever), but this is a test for us and we wanted something simple. Also, it's cheaper this way as there isn't a dyno running 24/7.
