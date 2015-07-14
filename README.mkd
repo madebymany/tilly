@@ -15,6 +15,10 @@ We had a good look around, and existing stand-up bots are very command-driven. T
 
 We couldn't find anything that did this, so I made Tilly. The Weimaraner stand-up bot.
 
+## Status
+
+Note this is an experiment, not a polished product. Almost nothing is configurable because it's set up just for us at the moment and I prioritised testing by one team here over making it friendly for others - but clearly making it more configurable is not a big job. There's a couple of rough edges we've found as noted in [the issue tracker](https://github.com/madebymany/tilly/issues).
+
 ## Code
 
 Uses [godep](https://github.com/tools/godep). Please keep its config file up-to-date with dependencies you use.
