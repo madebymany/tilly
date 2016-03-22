@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/abourget/slack"
 	"log"
+	"sync"
 )
 
 type UserManager struct {
@@ -13,11 +14,13 @@ type UserManager struct {
 	usersByIMChannelId map[string]*User
 	userIdBlacklist    map[string]bool
 	channelIdBlacklist map[string]bool
+	userListWaitMutex  sync.Mutex
 }
 
 type newStandupForUser struct {
 	standup *Standup
 	userId  string
+	reply   chan bool
 }
 
 func NewUserManager(client *AuthedSlack) (um *UserManager) {
@@ -30,12 +33,17 @@ func NewUserManager(client *AuthedSlack) (um *UserManager) {
 		userIdBlacklist:    make(map[string]bool),
 		channelIdBlacklist: make(map[string]bool),
 	}
+	um.userListWaitMutex.Lock()
 	go um.start()
 	return
 }
 
-func (self *UserManager) StartStandup(s *Standup, userId string) {
-	self.newStandups <- newStandupForUser{standup: s, userId: userId}
+func (self *UserManager) StartStandup(s *Standup, userId string) (ok bool) {
+	reply := make(chan bool, 1)
+	self.newStandups <- newStandupForUser{standup: s, userId: userId,
+		reply: reply}
+	ok = <-reply
+	return ok
 }
 
 func (self *UserManager) ReceiveMessageReply(m slack.MessageEvent) {
@@ -76,9 +84,11 @@ func (self *UserManager) start() {
 				user, err = self.lookupUserById(ns.userId)
 				if err != nil {
 					log.Printf("error getting user info; new standup dropped: %s", err)
+					ns.reply <- false
 					continue
 				}
 				if user == nil {
+					ns.reply <- false
 					continue
 				} else {
 					self.usersByUserId[ns.userId] = user
@@ -86,6 +96,7 @@ func (self *UserManager) start() {
 				}
 			}
 			user.StartStandup(ns.standup)
+			ns.reply <- true
 		}
 	}
 }

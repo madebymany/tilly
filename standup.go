@@ -67,24 +67,23 @@ func NewStandup(client *AuthedSlack, channel slack.Channel, userManager *UserMan
 		reportedWaitGroup: reportedWaitGroup,
 	}
 
-	s.userIds = make([]string, 0, len(s.Channel.Members))
-	for _, userId := range s.Channel.Members {
-		if userId != s.client.UserId {
-			s.userIds = append(s.userIds, userId)
-		}
-	}
-
 	return s
 }
 
 func (self *Standup) Run() {
-	for _, userId := range self.userIds {
-		self.userManager.StartStandup(self, userId)
+	self.userIds = make([]string, 0, len(self.Channel.Members))
+
+	for _, userId := range self.Channel.Members {
+		if userId != self.client.UserId && self.userManager.StartStandup(self, userId) {
+			self.userIds = append(self.userIds, userId)
+		}
 	}
+
 	go self.startTheClock()
 
 	_ = <-self.finishedChan
 	self.Finished = true
+	DebugLog.Print("sending summary...")
 
 	var msg bytes.Buffer
 
@@ -133,7 +132,13 @@ func (self *Standup) Run() {
 	params.Parse = "none"
 	params.LinkNames = 0
 	params.EscapeText = false
-	self.client.PostMessage(self.Channel.Id, msg.String(), params)
+
+	_, _, err := self.client.PostMessage(self.Channel.Id, msg.String(), params)
+	if err == nil {
+		DebugLog.Print("summary sent")
+	} else {
+		DebugLog.Printf("error posting summary: %s", err.Error())
+	}
 
 	self.reportedWaitGroup.Done()
 }
@@ -197,6 +202,7 @@ func (self *Standup) startTheClock() {
 }
 
 func (self *Standup) finish() {
+	DebugLog.Print("finishing standup...")
 	self.finishedChan <- struct{}{}
 }
 
