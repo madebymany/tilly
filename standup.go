@@ -87,7 +87,7 @@ func (self *Standup) Run() {
 
 	var msg bytes.Buffer
 
-	msg.WriteString("<!everyone>: *BARKBARKBARK Stand-up done!*\nQuestions were:\n")
+	msg.WriteString("<!here>: *BARKBARKBARK Stand-up done!*\nQuestions were:\n")
 	for _, q := range self.Questions {
 		msg.WriteString("• ")
 		msg.WriteString(q)
