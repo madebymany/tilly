@@ -1,9 +1,7 @@
 {
 	"ImportPath": "github.com/madebymany/tilly",
-	"GoVersion": "go1.4.2",
-	"Packages": [
-		"./..."
-	],
+	"GoVersion": "go1.6",
+	"GodepVersion": "v60",
 	"Deps": [
 		{
 			"ImportPath": "github.com/abourget/slack",

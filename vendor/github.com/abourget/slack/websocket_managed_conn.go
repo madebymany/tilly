@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/madebymany/tilly/Godeps/_workspace/src/golang.org/x/net/websocket"
+	"golang.org/x/net/websocket"
 )
 
 // ManageConnection is a long-running goroutine that handles

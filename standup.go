@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/madebymany/tilly/Godeps/_workspace/src/github.com/abourget/slack"
+	"github.com/abourget/slack"
 	"sync"
 	"time"
 )

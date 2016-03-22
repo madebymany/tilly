@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/madebymany/tilly/Godeps/_workspace/src/github.com/abourget/slack"
+	"github.com/abourget/slack"
 )
 
 type EventReceiver struct {

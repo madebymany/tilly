@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/madebymany/tilly/Godeps/_workspace/src/golang.org/x/net/websocket"
+	"golang.org/x/net/websocket"
 )
 
 // RTM represents a managed websocket connection. It also supports
